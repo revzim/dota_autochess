@@ -18,7 +18,7 @@ import (
 	"log"	
 	"strings"
 	"strconv"
-
+	"flag"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
@@ -130,6 +130,26 @@ type SpeciesBuff struct {
 
 func main() {
 	
+	// FLAGS
+	// FLAGS HERE ARE SET TO OBFUSCATE ONCE OPEN SOURCE
+	// LESS LIKELY TO BE AWARE OF PARSE/IMPLEMENTATION
+	// SOURCE AND PARSE INFO SHOULD BE HIDDEN UNTIL GATEWAY APPLIED
+
+	// FLAG FOR WEBSITE TO SCRAPE
+    url := flag.String("d", "https://google.com", "domain to scrape")
+
+    // FLAG FOR PARSE CLASS
+    classFlag := flag.String("cF", "classTag", "tag for scrape class")
+
+    // FLAG FOR PARSE PIECES
+    piecesFlag := flag.String("pF", "piecesTag", "tag for scrape pieces")
+
+    // PARSE SKIP 1
+    parseSkip1 := flag.String("s1", "word", "tag for skipper")
+
+    flag.Parse()
+	
+
 	// PIECES 
 	_pieces = make(ChessPieces)
 
@@ -162,14 +182,14 @@ func main() {
       * 46 - UNDEAD
       *  
 	*/
-	c.OnHTML(`div[id*=yui]`, func(e *colly.HTMLElement) {
+	c.OnHTML(*classFlag, func(e *colly.HTMLElement) {
 		e.DOM.Find("h2").Each(func(_ int, s *goquery.Selection) {
 			var buff ClassBuff
 			var sbuff SpeciesBuff
 			var class ChessClass
 			var species ChessSpecies
 			// var species ChessSpecies
-			if !strings.Contains(s.Text(), "Newsletter") && e.Index <=  21 {
+			if !strings.Contains(s.Text(), *parseSkip1) && e.Index <=  21 {
 				
 				class.Name = s.Text()
 				e.DOM.Find("p").Each(func(_ int, s1 *goquery.Selection) {
@@ -183,7 +203,7 @@ func main() {
 				})
 				// a1 := "image-slide-title"
 			}else {
-				if !strings.Contains(s.Text(), "Newsletter") {
+				if !strings.Contains(s.Text(), *parseSkip1) {
 					e.DOM.Find("p").Each(func(_ int, s1 *goquery.Selection) {
 					species.Name = s.Text()
 					id, _ := strconv.Atoi(s1.Text()[0:1])
@@ -206,7 +226,7 @@ func main() {
 			
 		})
 		
-		e.DOM.Find(".image-slide-title").Each(func(_ int, s2 *goquery.Selection) {
+		e.DOM.Find(*piecesFlag).Each(func(_ int, s2 *goquery.Selection) {
 			var piece ChessPiece
 			pieceId, _ := strconv.Atoi(s2.Text()[0:1])
 			piece.GoldCost = pieceId
@@ -240,7 +260,7 @@ func main() {
 
 
 	// START SCRAPING DOTA
-	c.Visit("https://www.esportstales.com/dota-2/auto-chess-class-and-species-hero-synergy-list")
+	c.Visit(*url)
 
 	// ASSIGN PIECES TO EACH SPECIFIED CLASS
 	for cname := range _classes {
