@@ -308,16 +308,20 @@ func main() {
 
     // CLASS ROUTING 
     e.GET("/autochess/classes", handleClasses)
-    e.GET("/autochess/class/:name", handleClassByName)
+    e.GET("/autochess/classes/name/:name", handleClassByName)
+    e.GET("/autochess/classes/buffs/:name", handleClassBuffsByName)
+    //
 
     // SPECIES ROUTING
     e.GET("/autochess/species", handleSpecies)
-    e.GET("/autochess/species/:name", handleSpeciesByName)
+    e.GET("/autochess/species/name/:name", handleSpeciesByName)
+    e.GET("/autochess/species/buffs/:name", handleSpeciesBuffsByName)
+    //
 
     // PIECES ROUTING
     e.GET("/autochess/pieces", handlePieces)
-    e.GET("/autochess/piece/:name", handlePiecesByName)
-
+    e.GET("/autochess/piece/name/:name", handlePiecesByName)
+    //e.GET("autochesss/piece/buffs/:name", handlePiecesBuffsByName)
     //
 
 
@@ -514,6 +518,10 @@ func handleClassByName(c echo.Context) error {
 	return CustomAutoChessHandler(c, "class", c.ParamValues()[0])
 }
 
+func handleClassBuffsByName(c echo.Context) error {
+	return CustomAutoChessHandler(c, "classBuffs", c.ParamValues()[0])
+}
+
 func handleSpecies(c echo.Context) error {
 	return c.JSON(http.StatusOK, _species)
 }
@@ -521,6 +529,11 @@ func handleSpecies(c echo.Context) error {
 func handleSpeciesByName(c echo.Context) error {
 	// return c.Render(http.StatusOK, "classes", _classes)
 	return CustomAutoChessHandler(c, "species", c.ParamValues()[0])
+}
+
+func handleSpeciesBuffsByName(c echo.Context) error {
+	// return c.Render(http.StatusOK, "classes", _classes)
+	return CustomAutoChessHandler(c, "speciesBuffs", c.ParamValues()[0])
 }
 
 func handlePieces(c echo.Context) error {
@@ -531,6 +544,12 @@ func handlePiecesByName(c echo.Context) error {
 	// return c.Render(http.StatusOK, "classes", _classes)
 	return CustomAutoChessHandler(c, "piece", c.ParamValues()[0])
 }
+
+// func handlePiecesBuffsByName(c echo.Context) error {
+// 	// return c.Render(http.StatusOK, "classes", _classes)
+// 	return CustomAutoChessHandler(c, "pieceBuffs", c.ParamValues()[0])
+// }
+
 
 func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 	// T IS PASSED TYPE AS STRING FOR PARSING GENERIC INTERFACE
@@ -545,6 +564,14 @@ func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 				}
 			}
 			break
+		case "classBuffs": 
+			for ind := range _classes {
+
+				if param == strings.ToLower(_classes[ind].Name) {
+					return c.JSON(http.StatusOK, _classes[ind].Buffs)
+				}
+			}
+			break
 		case "piece":
 
 			for ind := range _pieces {
@@ -554,12 +581,28 @@ func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 				}
 			}
 			break
+		// case "pieceBuffs":
+		// 	for ind := range _pieces {
+
+		// 		if param == strings.ToLower(_pieces[ind].Name) {
+		// 			return c.JSON(http.StatusOK, _pieces[ind] )
+		// 		}
+		// 	}
+		// 	break
 		case "species":
 
 			for ind := range _species {
 		
 				if param == strings.ToLower(_species[ind].Name) {
 					return c.JSON(http.StatusOK, _species[ind])
+				}
+			}
+			break
+		case "speciesBuffs":
+			for ind := range _species {
+		
+				if param == strings.ToLower(_species[ind].Name) {
+					return c.JSON(http.StatusOK, _species[ind].Buffs)
 				}
 			}
 			break
