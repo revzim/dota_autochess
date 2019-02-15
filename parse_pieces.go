@@ -18,17 +18,21 @@ import (
 
 // FOR NOW THESE GLOBAL VARS FOR CLASSES/SPECIES/PIECES START
 
-type ChessPieces map[string]*ChessPiece
+type Pieces map[string]*ChessPiece
 
 type Classes map[string]*ChessClass
 
 type Species map[string]*ChessSpecies
 
-var _pieces ChessPieces
+type Items map[string]*ChessItem
+
+var _pieces Pieces
 
 var _classes Classes
 
 var _species Species
+
+var _items Items
 
 // FOR NOW THESE GLOBAL VARS FOR CLASSES/SPECIES/PIECES END
 
@@ -128,6 +132,15 @@ type SpeciesBuff struct {
 }
 
 
+// ITEM STRUCT
+type ChessItem struct {
+	Name 			string 						`json:"name"`
+	Recipe 			[]string 					`json:"recipe"`
+	Effects 		[]string 					`json:"effects"`
+	Index 			int 						`json:"index"`
+}
+
+
 
 func main() {
 	// FLAGS
@@ -153,7 +166,7 @@ func main() {
 	
 
 	// PIECES 
-	_pieces = make(ChessPieces)
+	_pieces = make(Pieces)
 
 	// CLASSES
 	_classes = make(Classes)
@@ -161,6 +174,24 @@ func main() {
 	// SPECIES
 	_species = make(Species)
 
+	_items = make(Items)
+
+	// ScrapeForPieces(*url, *classFlag, *piecesFlag, *parseSkip1)
+	_ = url
+
+	ScrapeForChessItems("https://www.esportstales.com/dota-2/auto-chess-item-stats-combinations-and-upgrades", *classFlag, *piecesFlag, *parseSkip1)
+
+
+	// for ind := range _items {
+
+	// 	for i := range _items[ind].Effects {
+	// 		log.Printf("Item: %s : %s", _items[ind].Name, _items[ind].Effects[i])
+	// 	}
+		
+	// }
+}
+
+func ScrapeForPieces(url string, classFlag string, piecesFlag string, parseSkip1 string){
 	// INIT DEFAULT COLLECTOR FROM COLLY
 	c := colly.NewCollector()
 
@@ -185,14 +216,14 @@ func main() {
       * FOR EACH PIECE AVAIALABLE IN DOTA 2 AUTO CHESS
       *  
 	*/
-	c.OnHTML(*classFlag, func(e *colly.HTMLElement) {
-		e.DOM.Find("h2").Each(func(_ int, s *goquery.Selection) {
+	c.OnHTML(classFlag, func(e *colly.HTMLElement) {
+		e.DOM.Find("h3").Each(func(_ int, s *goquery.Selection) {
 			var buff ClassBuff
 			var sbuff SpeciesBuff
 			var class ChessClass
 			var species ChessSpecies
 			// var species ChessSpecies
-			if !strings.Contains(s.Text(), *parseSkip1) && e.Index <=  21 {
+			if !strings.Contains(s.Text(), parseSkip1) && e.Index <=  21 {
 				
 				class.Name = s.Text()
 				e.DOM.Find("p").Each(func(_ int, s1 *goquery.Selection) {
@@ -206,7 +237,7 @@ func main() {
 				})
 				// a1 := "image-slide-title"
 			}else {
-				if !strings.Contains(s.Text(), *parseSkip1) {
+				if !strings.Contains(s.Text(), parseSkip1) {
 					e.DOM.Find("p").Each(func(_ int, s1 *goquery.Selection) {
 					species.Name = s.Text()
 					id, _ := strconv.Atoi(s1.Text()[0:1])
@@ -229,7 +260,7 @@ func main() {
 			
 		})
 		
-		e.DOM.Find(*piecesFlag).Each(func(_ int, s2 *goquery.Selection) {
+		e.DOM.Find(piecesFlag).Each(func(_ int, s2 *goquery.Selection) {
 			var piece ChessPiece
 			pieceId, _ := strconv.Atoi(s2.Text()[0:1])
 			piece.GoldCost = pieceId
@@ -241,7 +272,7 @@ func main() {
 				piece.ClassId = ChessClassId(e.Index - 1)
 				piece.Class = GetClassNameFromId(piece.ClassId)
 				_pieces[piece.Name] = &piece
-			} else {
+		 	} else {
 				// INDEX AFTER 19 MEANS SPECIES NOW, SO SET SPECIES
 				if _, ok := _pieces[piece.Name]; ok {
 					_pieces[piece.Name].SpeciesId = append(_pieces[piece.Name].SpeciesId, ChessSpeciesId(ChessClassId(e.Index - 1)))
@@ -251,6 +282,7 @@ func main() {
 			}
 			
 		})
+
 		
 	})
 
@@ -263,7 +295,7 @@ func main() {
 
 
 	// START SCRAPING DOTA
-	c.Visit(*url)
+	c.Visit(url)
 
 	// ASSIGN PIECES TO EACH SPECIFIED CLASS
 	for cname := range _classes {
@@ -312,7 +344,71 @@ func main() {
 	WriteToFile("classes")
 	WriteToFile("species")
 	WriteToFile("pieces")
-	
+}
+
+func ScrapeForChessItems(url string, classFlag string, piecesFlag string, parseSkip1 string) {
+	// INIT DEFAULT COLLECTOR FROM COLLY
+	c := colly.NewCollector()
+	/*
+      * PARSES INFO AND CREATES ITEMS
+      *  
+	*/
+	c.OnHTML(classFlag, func(e *colly.HTMLElement) {
+		// name := make(chan string)
+		var item ChessItem
+		e.DOM.Find("h3").Each(func(_ int, s *goquery.Selection) {
+			item.Name = s.Text()
+			item.Index = e.Index
+			_items[item.Name] = &item
+		})
+		
+		e.DOM.Find(piecesFlag).Each(func(_ int, s1 *goquery.Selection) {
+			for ind := range _items {
+				if _items[ind].Index == e.Index - 2 {
+					// log.Printf("%d: %s", e.Index, s2.Text())
+					_items[ind].Recipe = append(_items[ind].Recipe, s1.Text()) 
+				}
+			}
+
+		})
+
+		e.DOM.Find(`li`).Each(func(_ int, s2 *goquery.Selection) {
+			
+			if !strings.Contains(s2.Text(), "Synergies") {
+				// log.Printf("%d: %s", e.Index, s2.Text())
+				for ind := range _items {
+					if _items[ind].Index == e.Index - 3 {
+						// log.Printf("%d: %s", e.Index, s2.Text())
+						_items[ind].Effects = append(_items[ind].Effects, s2.Text()) 
+					}
+				}
+			}
+			
+			
+		})
+
+	})
+
+	// COLLY RESPONSE
+	c.OnResponse(func(r *colly.Response) {
+		// log.Printf("%v", r.Ctx.Get("body"))
+
+		// log.Printf(">>> %s", r.Body)
+	})
+
+
+	// START SCRAPING DOTA
+	c.Visit(url)
+
+	WriteToFile("items")
+}
+
+func GetName(str string, c chan string) {
+	var item ChessItem
+	item.Name = str
+	_items[str] = &item
+	c <- str
+	close(c)
 }
 
 func WriteToFile(inFile string){
@@ -333,6 +429,8 @@ func WriteToFile(inFile string){
 		case "pieces":
 			d, _ = json.Marshal(_pieces)
 			break
+		case "items":
+			d, _ = json.Marshal(_items)
 	}
 	if len(d) > 0 {
 		if err := ioutil.WriteFile(fmt.Sprintf("data/%s.json", inFile), d, 0644); err != nil {
