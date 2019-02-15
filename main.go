@@ -24,12 +24,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
-// var ids map[string]interface{}
-
-// var classes []ChessClass
-// var species []ChessSpecies
-
-// var classes map[string]ChessClass
+// FOR NOW THESE GLOBAL VARS FOR CLASSES/SPECIES/PIECES START
 
 type ChessPieces map[string]*ChessPiece
 
@@ -43,6 +38,7 @@ var _classes Classes
 
 var _species Species
 
+// FOR NOW THESE GLOBAL VARS FOR CLASSES/SPECIES/PIECES END
 
 // TYPE ALIAS FOR CHESS CLASS ID
 type ChessClassId int
