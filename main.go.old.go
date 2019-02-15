@@ -17,13 +17,13 @@ import (
 	// "fmt"
 	// "log"	
 	"strings"
-	// "strconv"
+	"strconv"
 	"flag"
 
 	// "bufio"
-	"io/ioutil"
+	// "io/ioutil"
 	// "bytes"
-	"encoding/json"
+	// "encoding/json"
 	"time"
 	"math/rand"
 	"io"
@@ -34,8 +34,8 @@ import (
 	"net/http"
 
 
-	// "github.com/PuerkitoBio/goquery"
-	// "github.com/gocolly/colly"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/gocolly/colly"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -192,6 +192,22 @@ func main() {
 
 
 	// FLAGS
+	// FLAGS HERE ARE SET TO OBFUSCATE ONCE OPEN SOURCE
+	// LESS LIKELY TO BE AWARE OF PARSE/IMPLEMENTATION
+	// SOURCE AND PARSE INFO SHOULD BE HIDDEN UNTIL GATEWAY APPLIED
+
+	// FLAG FOR WEBSITE TO SCRAPE
+    url := flag.String("d", "https://google.com", "domain to scrape")
+
+    // FLAG FOR PARSE CLASS
+    classFlag := flag.String("cF", "classTag", "tag for scrape class")
+
+    // FLAG FOR PARSE PIECES
+    piecesFlag := flag.String("pF", "piecesTag", "tag for scrape pieces")
+
+    // PARSE SKIP 1
+    parseSkip1 := flag.String("s1", "word", "tag for skipper")
+
 
 	// FLAG FOR PORT NUMBER
     portPtr := flag.String("port", "443", "port number to run server")
@@ -201,13 +217,117 @@ func main() {
 	
 
 	// PIECES 
-	GetDataFromFile("pieces") 
-	
+	_pieces = make(ChessPieces)
+
 	// CLASSES
-	GetDataFromFile("classes")
-	
+	_classes = make(Classes)
+
 	// SPECIES
-	GetDataFromFile("species")
+	_species = make(Species)
+
+	// INIT DEFAULT COLLECTOR FROM COLLY
+	c := colly.NewCollector()
+
+	// IF WANT TO USE PUT ON CONTEXT COLLY 
+	c.OnRequest(func(r *colly.Request) {
+		// r.Ctx.Put("url", r.URL.String())
+		
+		/*
+		body, errRead := ioutil.ReadAll(r.Body)
+			if errRead != nil {
+				log.Panic("reading error", errRead)
+			}
+		b := fmt.Sprintf("%s", string(body))
+		r.Ctx.Put("body", b)
+		*/
+	})
+	
+	/*
+      * 2 - ASSASSIN
+      * 46 - UNDEAD
+      * PARSES INFO AND CREATES CLASSES/SPECIES/PIECES 
+      * FOR EACH PIECE AVAIALABLE IN DOTA 2 AUTO CHESS
+      *  
+	*/
+	c.OnHTML(*classFlag, func(e *colly.HTMLElement) {
+		e.DOM.Find("h2").Each(func(_ int, s *goquery.Selection) {
+			var buff ClassBuff
+			var sbuff SpeciesBuff
+			var class ChessClass
+			var species ChessSpecies
+			// var species ChessSpecies
+			if !strings.Contains(s.Text(), *parseSkip1) && e.Index <=  21 {
+				
+				class.Name = s.Text()
+				e.DOM.Find("p").Each(func(_ int, s1 *goquery.Selection) {
+					id, _ := strconv.Atoi(s1.Text()[0:1])
+					buff.TypeCount = id
+					buff.ClassId = ChessClassId(e.Index)
+					class.Id = buff.ClassId
+					buff.Info = s1.Text()[6:]
+					// log.Printf("[%d]===>%s[%d]: %s", buff.TypeCount, class.Name, buff.ClassId, buff.Info)
+					class.Buffs = append(class.Buffs, buff)
+				})
+				// a1 := "image-slide-title"
+			}else {
+				if !strings.Contains(s.Text(), *parseSkip1) {
+					e.DOM.Find("p").Each(func(_ int, s1 *goquery.Selection) {
+					species.Name = s.Text()
+					id, _ := strconv.Atoi(s1.Text()[0:1])
+					sbuff.TypeCount = id
+					sbuff.SpeciesId = ChessSpeciesId(e.Index)
+					species.Id = sbuff.SpeciesId
+					sbuff.Info = s1.Text()[6:]
+					// log.Printf("[%d]===>%s[%d]: %s", buff.TypeCount, class.Name, buff.ClassId, buff.Info)
+					species.Buffs = append(species.Buffs, sbuff)
+				})
+				}
+				
+			}
+			if class.Name != "" {
+				_classes[class.Name] = &class
+			}
+			if species.Name != "" {
+				_species[species.Name] = &species
+			}
+			
+		})
+		
+		e.DOM.Find(*piecesFlag).Each(func(_ int, s2 *goquery.Selection) {
+			var piece ChessPiece
+			pieceId, _ := strconv.Atoi(s2.Text()[0:1])
+			piece.GoldCost = pieceId
+			piece.Name = s2.Text()[3:]
+			
+			// <= 21 GET ALL AVAILABLE CHESS PIECES
+			if e.Index <= 21 {
+				// piece.ClassId = ChessClassId((e.Index - 1))
+				piece.ClassId = ChessClassId(e.Index - 1)
+				piece.Class = GetClassNameFromId(piece.ClassId)
+				_pieces[piece.Name] = &piece
+			} else {
+				// INDEX AFTER 19 MEANS SPECIES NOW, SO SET SPECIES
+				if _, ok := _pieces[piece.Name]; ok {
+					_pieces[piece.Name].SpeciesId = append(_pieces[piece.Name].SpeciesId, ChessSpeciesId(ChessClassId(e.Index - 1)))
+					_pieces[piece.Name].Species   = append(_pieces[piece.Name].Species, GetSpeciesNameFromId(ChessSpeciesId(ChessClassId(e.Index - 1))))
+				}
+		
+			}
+			
+		})
+		
+	})
+
+	// COLLY RESPONSE
+	c.OnResponse(func(r *colly.Response) {
+		// log.Printf("%v", r.Ctx.Get("body"))
+
+		// log.Printf(">>> %s", r.Body)
+	})
+
+
+	// START SCRAPING DOTA
+	c.Visit(*url)
 
 	// ASSIGN PIECES TO EACH SPECIFIED CLASS
 	for cname := range _classes {
@@ -359,73 +479,6 @@ func main() {
 	}
 }
 
-
-func GetDataFromFile(fileName string){
-	// SCORES FILE
-	f, err := os.Open(fmt.Sprintf("data/%s.json", fileName))
-	// if we os.Open returns an error then handle it
-	if err != nil {
-		log.Printf("Get Data Error: %e", err)
-	}
-	// DEFER CLOSE TO PARSE CONTENTS
-	defer f.Close()
-	switch fileName {
-		case "classes":
-			_classes = ParseJSONToClass(f)
-			break
-
-		case "species":
-			_species = ParseJSONToSpecies(f)
-			break
-
-		case "pieces":
-			_pieces = ParseJSONToPieces(f)
-			break
-
-	}	
-}
-
-
-func ParseJSONToClass(b io.Reader) Classes {
-    body, err := ioutil.ReadAll(b)
-    if err != nil {
-        log.Error("ParseJSON ioutil err:%e", err)
-    }
-    var c Classes
-    err = json.Unmarshal(body, &c)
-    if err != nil {
-        log.Error("ParseJSON json err: %e", err)
-    }
-    return c
-}
-
-func ParseJSONToSpecies(b io.Reader) Species {
-    body, err := ioutil.ReadAll(b)
-    if err != nil {
-        log.Error("ParseJSON ioutil err:%e", err)
-    }
-    var s Species
-    err = json.Unmarshal(body, &s)
-    if err != nil {
-        log.Error("ParseJSON json err: %e", err)
-    }
-    return s
-}
-
-func ParseJSONToPieces(b io.Reader) ChessPieces {
-    body, err := ioutil.ReadAll(b)
-    if err != nil {
-        log.Error("ParseJSON ioutil err:%e", err)
-    }
-    var p ChessPieces
-    err = json.Unmarshal(body, &p)
-    if err != nil {
-        log.Error("ParseJSON json err: %e", err)
-    }
-    return p
-}
-
-
 func customHTTPErrorHandler(err error, c echo.Context) {
     code := http.StatusInternalServerError
     // log.Printf("code: %d", code)
@@ -568,4 +621,90 @@ func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 	}
 
 	return c.JSON(http.StatusNotFound, echo.Map{"info": "error bad id"})
+}
+
+
+func GetSpeciesNameFromId(speciesId ChessSpeciesId) string {
+	switch speciesId {
+		case SBeast:
+			return "Beast"
+
+		case SDemon:
+			return "Demon"
+
+		case SDwarf:
+			return "Dwarf"
+
+		case SDragon:
+			return "Dragon"
+		
+		case SElement:
+			return "Element"
+			
+		case SElf:
+			return "Elf"
+			
+		case SGoblin:
+			return "Goblin"
+			
+		case SHuman:
+			return "Human"
+			
+		case SNaga:
+			return "Naga"
+			
+		case SOgre:
+			return "Ogre"
+			
+		case SOrc:
+			return "Orc"
+			
+		case STroll:
+			return "Troll"
+			
+		case SUndead:
+			return "Undead"
+		case SNone:
+			return "None"
+	}
+	return ""
+}
+
+func GetClassNameFromId(classId ChessClassId) string {
+	switch classId {
+		case CNone:
+			return "None"
+
+		case CAssasin:
+			return "Assassin"
+
+		case CDemonHunter:
+			return "Demon Hunter"
+
+		case CDruid:
+			return "Druid"
+
+		case CHunter:
+			return "Hunter"
+
+		case CKnight:
+			return "Knight"
+
+		case CMage:
+			return "Mage"
+
+		case CMech:
+			return "Mech"
+
+		case CShaman:
+			return "Shaman"
+
+		case CWarlock:
+			return "Warlock"
+
+		case CWarrior:
+			return "Warrior"
+	}
+	return ""
+		
 }
