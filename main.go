@@ -43,8 +43,11 @@ var _classes Classes
 
 var _species Species
 
+
+// TYPE ALIAS FOR CHESS CLASS ID
 type ChessClassId int
 
+// CONST ENUM FOR DOTA AUTO CHESS CLASS IDS
 const(	
 	CNone 					ChessClassId = iota * 2
 	CAssasin 				ChessClassId = iota * 2
@@ -72,8 +75,10 @@ const(
 	CUndead 				ChessClassId = iota * 2
 )
 
+// TYPE ALIAS FOR CHESS SPECIES ID
 type ChessSpeciesId int
 
+// CONST ENUM FOR DOTA AUTO CHESS SPECIES IDS
 const (
 	SNone 		=		 	ChessSpeciesId(CWarlock)
 	SBeast 		=		 	ChessSpeciesId(CBeast)
@@ -91,7 +96,7 @@ const (
 	SUndead 	=			ChessSpeciesId(CUndead)
 )
 
-
+// PIECE STRUCT
 type ChessPiece struct {
 	Name 			string
 	Class 			string
@@ -101,6 +106,7 @@ type ChessPiece struct {
 	GoldCost		int
 }
 
+// CHESS SPECIES STRUCT
 type ChessSpecies struct {
 	Name 		string
 	Buffs		[]SpeciesBuff
@@ -108,6 +114,7 @@ type ChessSpecies struct {
 	Pieces 		[]ChessPiece
 }
 
+// CHESS CLASS STRUCT
 type ChessClass struct {
 	Name 		string
 	Buffs		[]ClassBuff
@@ -115,19 +122,21 @@ type ChessClass struct {
 	Pieces 		[]ChessPiece
 }
 
+// CLASS BUFF STRUCT
 type ClassBuff struct {
 	ClassId 		ChessClassId
 	TypeCount 		int
 	Info			string
 }
 
+// SPECIES BUFF STRUCT
 type SpeciesBuff struct {
 	SpeciesId 		ChessSpeciesId
 	TypeCount 		int
 	Info			string
 }
 
-
+// MAIN FUNC
 func main() {
 	
 	// FLAGS
@@ -147,6 +156,7 @@ func main() {
     // PARSE SKIP 1
     parseSkip1 := flag.String("s1", "word", "tag for skipper")
 
+    // FLAG PARSE FLAGS
     flag.Parse()
 	
 
@@ -159,13 +169,12 @@ func main() {
 	// SPECIES
 	_species = make(Species)
 
-	// Instantiate default collector
+	// INIT DEFAULT COLLECTOR FROM COLLY
 	c := colly.NewCollector()
 
-	// Before making a request put the URL with
-	// the key of "url" into the context of the request
+	// IF WANT TO USE PUT ON CONTEXT COLLY 
 	c.OnRequest(func(r *colly.Request) {
-		r.Ctx.Put("url", r.URL.String())
+		// r.Ctx.Put("url", r.URL.String())
 		
 		/*
 		body, errRead := ioutil.ReadAll(r.Body)
@@ -180,6 +189,8 @@ func main() {
 	/*
       * 2 - ASSASSIN
       * 46 - UNDEAD
+      * PARSES INFO AND CREATES CLASSES/SPECIES/PIECES 
+      * FOR EACH PIECE AVAIALABLE IN DOTA 2 AUTO CHESS
       *  
 	*/
 	c.OnHTML(*classFlag, func(e *colly.HTMLElement) {
@@ -292,6 +303,7 @@ func main() {
 	log.Printf(">>%+v", _species)
 	// log.Printf("Num Chars: %d | %d", len(_pieces), 55)
 }
+
 
 func GetSpeciesNameFromId(speciesId ChessSpeciesId) string {
 	switch speciesId {
