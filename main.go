@@ -29,6 +29,7 @@ import (
 	"io"
 	"html/template"
 	"os"
+	"net/url"
 	
 	"fmt"
 	"net/http"
@@ -53,12 +54,15 @@ type Classes map[string]*ChessClass
 
 type Species map[string]*ChessSpecies
 
+type Items map[string]*ChessItem
+
 var _pieces ChessPieces
 
 var _classes Classes
 
 var _species Species
 
+var _items Items
 // FOR NOW THESE GLOBAL VARS FOR CLASSES/SPECIES/PIECES END
 
 // TYPE ALIAS FOR CHESS CLASS ID
@@ -142,6 +146,14 @@ type ChessClass struct {
 	Pieces 		[]ChessPiece 				`json:"pieces"`
 }
 
+// ITEM STRUCT
+type ChessItem struct {
+	Name 			string 						`json:"name"`
+	Recipe 			[]string 					`json:"recipe"`
+	Effects 		[]string 					`json:"effects"`
+	Index 			int 						`json:"index"`
+}
+
 // CLASS BUFF STRUCT
 type ClassBuff struct {
 	ClassId 		ChessClassId 			`json:"class_id"`
@@ -208,6 +220,9 @@ func main() {
 	
 	// SPECIES
 	GetDataFromFile("species")
+
+	// ITEMS
+	GetDataFromFile("items")
 
 	// ASSIGN PIECES TO EACH SPECIFIED CLASS
 	for cname := range _classes {
@@ -324,6 +339,13 @@ func main() {
     //e.GET("autochesss/piece/buffs/:name", handlePiecesBuffsByName)
     //
 
+    // SPECIES ROUTING
+    e.GET("/autochess/items", handleItems)
+    e.GET("/autochess/items/name/:name", handleItemsByName)
+    e.GET("autochess/items/recipe/:name", handleItemsByComponent)
+    // e.GET("/autochess/species/buffs/:name", handleSpeciesBuffsByName)
+    //
+
 
 	// USE JWT MIDDLEWARE WITH REGISTERED GROUP
     registerJWTGroup.Use(middleware.JWTWithConfig(cfg))
@@ -385,7 +407,9 @@ func GetDataFromFile(fileName string){
 		case "pieces":
 			_pieces = ParseJSONToPieces(f)
 			break
-
+			
+		case "items":
+			_items = ParseJSONToItems(f)
 	}	
 }
 
@@ -428,6 +452,20 @@ func ParseJSONToPieces(b io.Reader) ChessPieces {
     }
     return p
 }
+
+func ParseJSONToItems(b io.Reader) Items {
+    body, err := ioutil.ReadAll(b)
+    if err != nil {
+        log.Error("ParseJSON ioutil err:%e", err)
+    }
+    var i Items
+    err = json.Unmarshal(body, &i)
+    if err != nil {
+        log.Error("ParseJSON json err: %e", err)
+    }
+    return i
+}
+
 
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -550,6 +588,32 @@ func handlePiecesByName(c echo.Context) error {
 // 	return CustomAutoChessHandler(c, "pieceBuffs", c.ParamValues()[0])
 // }
 
+func handleItems(c echo.Context) error {
+	return c.JSON(http.StatusOK, _items)
+}
+
+func handleItemsByName(c echo.Context) error {
+	// return c.Render(http.StatusOK, "classes", _classes)
+	d, err := url.PathUnescape(c.ParamValues()[0])
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{
+			"info": "error bad item path name",
+		})
+	}
+	return CustomAutoChessHandler(c, "items", d)
+}
+
+func handleItemsByComponent(c echo.Context) error {
+	// return c.Render(http.StatusOK, "classes", _classes)
+	d, err := url.PathUnescape(c.ParamValues()[0])
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{
+			"info": "error bad item path name",
+		})
+	}
+	return CustomAutoChessHandler(c, "itemsComponent", d)
+}
+
 
 func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 	// T IS PASSED TYPE AS STRING FOR PARSING GENERIC INTERFACE
@@ -606,6 +670,29 @@ func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 				}
 			}
 			break
+		case "items":
+
+			for ind := range _items {
+				if param == strings.ToLower(_items[ind].Name) {
+					return c.JSON(http.StatusOK, _items[ind])
+				}
+			}
+		case "itemsComponent":
+			i := make(Items)
+			// var recipes []ChessItem.Recipe
+			// for recipeInd := range recipes {
+			// 	recipes = append(recipes, strings.ToLower(recipes[recipesInd].Recipe))
+			// }
+			for ind := range _items {
+				for rInd := range _items[ind].Recipe {
+					// log.Printf("item Recipe: %s | %s", strings.ToLower(_items[ind].Recipe[rInd]), param)
+					if strings.ToLower(_items[ind].Recipe[rInd]) == param {
+						i[_items[ind].Name] = _items[ind]
+						// i = append(i, _items[ind])
+					}
+				} 
+			}
+			return c.JSON(http.StatusOK, i)
 		default:
 			break
 	}

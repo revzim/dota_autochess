@@ -142,6 +142,14 @@ type ChessClass struct {
 	Pieces 		[]ChessPiece 				`json:"pieces"`
 }
 
+// ITEM STRUCT
+type ChessItem struct {
+	Name 			string 						`json:"name"`
+	Recipe 			[]string 					`json:"recipe"`
+	Effects 		[]string 					`json:"effects"`
+	Index 			int 						`json:"index"`
+}
+
 // CLASS BUFF STRUCT
 type ClassBuff struct {
 	ClassId 		ChessClassId 			`json:"class_id"`
