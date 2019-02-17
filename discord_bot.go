@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"strings"
 	"net/http"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -20,17 +21,61 @@ import (
 // TOKEN FOR DISCORD BOT
 var (
 	Token string
+	helpMsg string
 )
 
 func init() {
+	
+	
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 }
+
+var embedHelpMsg *discordgo.MessageEmbed
 
 // HANDLER METHODS ARE ALWAYS lowerCamel
 // IMPLEMENTED METHODS (HELPERS & GENERICS ALWAYS) StrongCamel
 
 func main () {
+	// CREATE HELP MSG
+	embedHelpMsg = &discordgo.MessageEmbed{
+		Author:      &discordgo.MessageEmbedAuthor{},
+	    Color:       0x00ff00, // Green
+	    Description: "Bot Help!",
+	    Fields: []*discordgo.MessageEmbedField{
+	        &discordgo.MessageEmbedField{
+	            Name:   "!d_class <query_term>",
+	            Value:  "```\n" +
+	            	"Name: Knight\n====================================\nBuffs:\n====================================\n\t" +
+					    "1. All friendly knights have a 25% chance to trigger a damage-reduction shield when attacked.\n\t" +
+					    "2. All friendly knights have a 35% chance to trigger a damage-reduction shield when attacked.\n\t" +
+					    "3. All friendly knights have a 45% chance to trigger a damage-reduction shield when attacked.\nPieces:\n" +
+					"====================================\nName: Abaddon\n" +
+					"====================================\nSpecies:\n\t1. Undead\nGold Cost: 3 gold\n====================================\n" +
+					"...\n```",
+	            Inline: true,
+	        },
+	        &discordgo.MessageEmbedField{
+	            Name:   "!d_item <query_term>",
+	            Value:  "```\n" + 
+	            	"Name: Crystalys\n====================================\n\nRecipe:\n====================================\n" +
+	            	"\t1. Attack Blade\n\t2. Broadsword\nEffects:\n====================================\n\t1. +15 Attack Damage\n\t2. 15% chance to deal 1.5x damage\n====================================" +
+	            "```",
+	            Inline: true,
+	        },
+	        &discordgo.MessageEmbedField{
+	            Name:   "!d_piece <query_term>",
+	            Value:  "```\n" +
+	            	"Name: Dragon Knight\n====================================\nSpecies:\n\t1. Dragon\n\t2. Human\nGold Cost: 4 gold\n" +
+					"====================================\n" +
+	            "```",
+	            Inline: true,
+	        },
+	    },
+	    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+	    Title:     "Bot Help!",
+	}
+
 	// INIT DISCORD BOT SESSION WITH TOKEN
 	dg, err := discordgo.New("Bot " + Token)
 
@@ -74,8 +119,11 @@ func handleDiscordCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content[:1] == "!" {
 		
 		msg = ParseMsg(m.Content, strings.Index(m.Content, " "))
+		log.Printf("msg: %s", msg)
 		if msg != "" {
 			s.ChannelMessageSend(m.ChannelID, msg)	
+		}else {
+			s.ChannelMessageSendEmbed(m.ChannelID, embedHelpMsg)	
 		}
 		
 	} 
@@ -159,8 +207,6 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			efs = efs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["effects"].([]interface{})[ind]) 
 		}
 		return fmt.Sprintf(str, c["name"], rs, efs)
-		// s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(str, c["name"], rs, efs))	
-		break
 
 		case "className": 
 			str := "```" + 
@@ -180,8 +226,7 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			}
 			// }
 			return fmt.Sprintf(str, c["name"], bfs, pcs)
-			// s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(str, c["name"], bfs, pcs))	
-			break
+		
 		case "pieceName":
 			str := "```" + 
 				"Name: %s\n====================================\n" +
@@ -197,13 +242,9 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			}else {
 				sps = sps + fmt.Sprintf("\t%s\n", "None") 
 			}
-			
-			// for ind := range c["gold_cost"].(float64) {
-			// 	gcs = gcs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["gold_cost"].([]interface{})[ind]) 
-			// }
+
 			return fmt.Sprintf(str, c["name"], sps, int(c["gold_cost"].(float64)))
-			//s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(str, c["name"], sps, int(c["gold_cost"].(float64))))	
-			break
+
 	}
 	return ""
 }

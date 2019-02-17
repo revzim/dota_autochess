@@ -215,7 +215,7 @@ func main() {
     portPtr := flag.String("port", "443", "port number to run server")
 
     // FLAG FOR SERVER KEY HASH SECRET 
-    secretKeyPtr := flag.String("k", "TESTKEYx01", "TESTKEY FOR SERVER JWT")
+    secretKeyPtr := flag.String("k", "", "TESTKEY FOR SERVER JWT")
 
     // FLAG PARSE FLAGS
     flag.Parse()
