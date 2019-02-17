@@ -143,9 +143,9 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 	switch key {
 		case "itemName": 
 		str := "```" + 
-			"Name: %s\n" +
-			"Recipe: \n%s" +
-			"Effects: \n%s" +
+			"Name: %s\n====================================\n" +
+			"Recipe:\n====================================\n%s" +
+			"Effects:\n====================================\n%s====================================" +
 		 	"```"
 		var rs string
 		var efs string
@@ -161,9 +161,9 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 
 		case "className": 
 			str := "```" + 
-				"Name: %s\n" +
-				"Buffs: \n%s" +
-				"Pieces: \n%s" +
+				"Name: %s\n====================================\n" +
+				"Buffs:\n====================================\n%s\n" +
+				"Pieces:\n====================================\n%s\n" +
 			 	"```"
 			
 			var bfs string
@@ -181,16 +181,18 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			break
 		case "pieceName":
 			str := "```" + 
-				"\nName: %s\n" +
+				"Name: %s\n====================================\n" +
 				"Species: \n%s" +
 				"Gold Cost: %d gold\n" +
-			 	"```"
+			 	"====================================\n```"
 			var sps string
 			// var gcs string
 			if c["species"] != nil {
 				for ind := range c["species"].([]interface{}) {
 					sps = sps + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["species"].([]interface{})[ind]) 
 				}
+			}else {
+				sps = sps + fmt.Sprintf("\t%s\n", "None") 
 			}
 			
 			// for ind := range c["gold_cost"].(float64) {
