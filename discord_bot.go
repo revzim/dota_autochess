@@ -46,28 +46,28 @@ func main () {
 	        &discordgo.MessageEmbedField{
 	            Name:   "!d_class <query_term>",
 	            Value:  "```\n" +
-	            	"Name: Knight\n====================================\nBuffs:\n====================================\n\t" +
+	            	"Name: Knight\n================================\nBuffs:\n================================\n\t" +
 					    "1. All friendly knights have a 25% chance to trigger a damage-reduction shield when attacked.\n\t" +
 					    "2. All friendly knights have a 35% chance to trigger a damage-reduction shield when attacked.\n\t" +
 					    "3. All friendly knights have a 45% chance to trigger a damage-reduction shield when attacked.\nPieces:\n" +
-					"====================================\nName: Abaddon\n" +
-					"====================================\nSpecies:\n\t1. Undead\nGold Cost: 3 gold\n====================================\n" +
+					"================================\nName: Abaddon\n" +
+					"================================\nSpecies:\n\t1. Undead\nGold Cost: 3 gold\n================================\n" +
 					"...\n```",
 	            Inline: true,
 	        },
 	        &discordgo.MessageEmbedField{
 	            Name:   "!d_item <query_term>",
 	            Value:  "```\n" + 
-	            	"Name: Crystalys\n====================================\nRecipe:\n====================================\n" +
-	            	"\t1. Attack Blade\n\t2. Broadsword\nEffects:\n====================================\n\t1. +15 Attack Damage\n\t2. 15% chance to deal 1.5x damage\n====================================" +
+	            	"Name: Crystalys\n================================\nRecipe:\n================================\n" +
+	            	"\t1. Attack Blade\n\t2. Broadsword\nEffects:\n================================\n\t1. +15 Attack Damage\n\t2. 15% chance to deal 1.5x damage\n================================" +
 	            "```",
 	            Inline: true,
 	        },
 	        &discordgo.MessageEmbedField{
 	            Name:   "!d_piece <query_term>",
 	            Value:  "```\n" +
-	            	"Name: Dragon Knight\n====================================\nSpecies:\n\t1. Dragon\n\t2. Human\nGold Cost: 4 gold\n" +
-					"====================================\n" +
+	            	"Name: Dragon Knight\n================================\nSpecies:\n\t1. Dragon\n\t2. Human\nGold Cost: 4 gold\n" +
+					"================================\n" +
 	            "```",
 	            Inline: true,
 	        },
@@ -246,9 +246,9 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 	switch key {
 		case "itemName": 
 		str := "```" + 
-			"Name: %s\n====================================\n" +
-			"Recipe:\n====================================\n%s" +
-			"Effects:\n====================================\n%s====================================" +
+			"Name: %s\n================================\n" +
+			"Recipe:\n================================\n%s" +
+			"Effects:\n================================\n%s================================" +
 		 	"```"
 		var rs string
 		var efs string
@@ -262,9 +262,9 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 
 		case "className": 
 			str := "```" + 
-				"Name: %s\n====================================\n" +
-				"Buffs:\n====================================\n%s\n" +
-				"Pieces:\n====================================\n%s\n" +
+				"Name: %s\n================================\n" +
+				"Buffs:\n================================\n%s\n" +
+				"Pieces:\n================================\n%s\n" +
 			 	"```"
 			
 			var bfs string
@@ -281,10 +281,10 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 		
 		case "pieceName":
 			str := "```" + 
-				"Name: %s\n====================================\n" +
+				"Name: %s\n================================\n" +
 				"Species: \n%s" +
 				"Gold Cost: %d gold\n" +
-			 	"====================================\n```"
+			 	"================================\n```"
 			var sps string
 			// var gcs string
 			if c["species"] != nil {
