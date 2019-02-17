@@ -225,8 +225,7 @@ func ParseMsg(msg string, msgLen int) string {
 			break
 		case 8:
 				if msg[:msgLen] == "!d_class" {
-					return ParseUserCommand("className", msg, msgLen)
-					
+					return ParseUserCommand("className", msg, msgLen)	
 			}
 
 			if msg[:msgLen] == "!d_piece" {
@@ -244,6 +243,8 @@ func ParseMsg(msg string, msgLen int) string {
 // PARSE USER COMMAND GENERIC WITH KEY FOR WHICH PARSE COMMAND
 func ParseUserCommand(key string, msg string, msgLen int) string {
 	query := url.PathEscape(strings.ToLower(msg[msgLen+1:]))
+	
+	log.Printf("Key: %s --msg: %s", key, query)
 	var urlPath string
 	switch key {
 		case "itemName":
@@ -255,23 +256,34 @@ func ParseUserCommand(key string, msg string, msgLen int) string {
 			break
 
 		case "pieceName":
-			urlPath = fmt.Sprintf("http://localhost:8080/autochess/piece/name/%s", query)
+			urlPath = fmt.Sprintf("http://localhost:8080/autochess/pieces/name/%s", query)
 			break
-
+		case "pieceCBuffs":
+			urlPath = fmt.Sprintf("http://localhost:8080/autochess/classes/buffs/%s", query)
+			break
+		case "pieceSBuffs":
+			urlPath = fmt.Sprintf("http://localhost:8080/autochess/species/buffs/%s", query)
+			break
 	}
-
-	log.Printf("search term: %s", query)
-	
+	// log.Printf("url: %s", urlPath)
 	resp, err := http.Get(urlPath)
 	if err != nil {
 		return fmt.Sprintf("Error connecting to server: %s", err)
 	}
 
 	defer resp.Body.Close()
+
 	c := ParseJSON(resp.Body)
-	if len(c) > 1 {
+	// if c["_buffs"] != nil {
+		
+	// 	log.Printf("bufferinos bitch: %s", c["_buffs"])
+	// }
+	resp.Body.Close()
+	if len(c) >= 1 {
+		
 		return FormatJSONResponse(key, c)
 	}else {
+
 		return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", msg[msgLen+1:])
 	}
 }
@@ -317,35 +329,100 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 		case "pieceName":
 			str := "```" + 
 				"Name: %s\n================================\n" +
-				"Species: \n%s" +
+				"Species:\n%s" +
+				"Species Buffs:\n%s\n" +
+				"Class Buffs:\n%s\n" +
 				"Gold Cost: %d gold\n" +
 			 	"================================\n```"
 			var sps string
+			var sbs string
+			var cbs string
+
 			// var gcs string
+			// var speciesBuffNames []string
+			// var classBuffName string
 			if c["species"] != nil {
+				
+				// LOOP THRU SPECIES AND GET ALL FORMATTED
 				for ind := range c["species"].([]interface{}) {
+					s1 := &c["species"].([]interface{})[ind]
+					
 					sps = sps + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["species"].([]interface{})[ind]) 
+					sbs = ParseUserCommand("pieceSBuffs", strings.ToLower((*s1).(string)), -1)
+					
 				}
+
+
+				// // 
+				// str := fmt.Sprintf("%s.", c["class"].(string))
+				// classBuffName = str
+				cbs = ParseUserCommand("pieceCBuffs", strings.ToLower(c["class"].(string)), -1)
+				// _ = cBuffInfo
+
+
 			}else {
 				sps = sps + fmt.Sprintf("\t%s\n", "None") 
 			}
+			
+			return fmt.Sprintf(str, c["name"], sps, sbs, cbs, int(c["gold_cost"].(float64)))
+		case "pieceCBuffs":
+			log.Printf("%+v", c)
+			var cbs string
+			cbs = ""
+			for cname := range c {
+				for cInd := range c[cname].([]interface{}) {
+					// log.Printf("came: %s", c[cname].([]interface{})[cInd].(map[string]interface{})["info"])
+					cbs = cbs + fmt.Sprintf("\t%d. %s\n", (cInd + 1), c[cname].([]interface{})[cInd].(map[string]interface{})["info"]) 
+				}
+			}
+			if cbs != "" {
+				return cbs
+			} else {
+				return "None"
+			}
 
-			return fmt.Sprintf(str, c["name"], sps, int(c["gold_cost"].(float64)))
+		case "pieceSBuffs":
 
+			// log.Printf("%+v", c)
+			var sbs string
+			sbs = ""
+			for cname := range c {
+				for cInd := range c[cname].([]interface{}) {
+					// log.Printf("came: %s", c[cname].([]interface{})[cInd].(map[string]interface{})["info"])
+					sbs = sbs + fmt.Sprintf("\t%d. %s\n", (cInd + 1), c[cname].([]interface{})[cInd].(map[string]interface{})["info"]) 
+				}
+			}
+			if sbs != "" {
+				return sbs
+			} else {
+				return "None"
+			}
+			
 	}
 	return ""
 }
 
 // GENERIC JSON PARSER TO RETURN GENERIC MAP
 func ParseJSON(b io.Reader) map[string]interface{} {
+
     body, err := ioutil.ReadAll(b)
     if err != nil {
         log.Printf("ParseJSON ioutil err:%s", err)
     }
+    // log.Printf("%s", string(body))
     c := make(map[string]interface{})
+
     err = json.Unmarshal(body, &c)
     if err != nil {
         log.Printf("ParseJSON json err: %s", err)
+        var m []interface{}
+        err = json.Unmarshal(body, &m)
+        if err != nil {
+        	log.Printf("ParseJSON json err: %s", err)
+        }
+        
+        c["_buffs"] = m
+        return c
     }
     return c
 }
