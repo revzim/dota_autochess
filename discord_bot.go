@@ -199,7 +199,7 @@ func CreateSplitPayloads(msg string) []string {
 		if ind >= len(msg) {
 			ind = len(msg)
 		}
-		log.Printf("ind: %d", ind)
+		// log.Printf("ind: %d", ind)
 		if msg[lastInd:ind][:3] ==  "```" {
 			msgs = append(msgs, msg[lastInd:ind] + "```")
 		} else if msg[lastInd:ind][len(msg[lastInd:ind]) - 3:] ==  "```" {
@@ -244,7 +244,7 @@ func ParseMsg(msg string, msgLen int) string {
 func ParseUserCommand(key string, msg string, msgLen int) string {
 	query := url.PathEscape(strings.ToLower(msg[msgLen+1:]))
 	
-	log.Printf("Key: %s --msg: %s", key, query)
+	// log.Printf("Key: %s --msg: %s", key, query)
 	var urlPath string
 	switch key {
 		case "itemName":
@@ -274,12 +274,10 @@ func ParseUserCommand(key string, msg string, msgLen int) string {
 	defer resp.Body.Close()
 
 	c := ParseJSON(resp.Body)
-	// if c["_buffs"] != nil {
-		
-	// 	log.Printf("bufferinos bitch: %s", c["_buffs"])
-	// }
+
+	// log.Printf("C: %v", c)
 	resp.Body.Close()
-	if len(c) >= 1 {
+	if len(c) >= 1 && c["info"] != "error bad id" {
 		
 		return FormatJSONResponse(key, c)
 	}else {
@@ -299,13 +297,18 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 		 	"```"
 		var rs string
 		var efs string
-		for ind := range c["recipe"].([]interface{}) {
-			rs = rs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["recipe"].([]interface{})[ind]) 
+		if c["recipe"] != nil {
+			for ind := range c["recipe"].([]interface{}) {
+				rs = rs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["recipe"].([]interface{})[ind]) 
+			}
+			for ind := range c["effects"].([]interface{}) {
+				efs = efs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["effects"].([]interface{})[ind]) 
+			}
+			return fmt.Sprintf(str, c["name"], rs, efs)
+		}else {
+			return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", c["name"])
 		}
-		for ind := range c["effects"].([]interface{}) {
-			efs = efs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["effects"].([]interface{})[ind]) 
-		}
-		return fmt.Sprintf(str, c["name"], rs, efs)
+		
 
 		case "className": 
 			str := "```" + 
@@ -316,15 +319,21 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			
 			var bfs string
 			var pcs string
-			for ind := range c["buffs"].([]interface{}) {
-				bfs = bfs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["buffs"].([]interface{})[ind].(map[string]interface{})["info"]) 
+			if c["buffs"] != nil {
+				for ind := range c["buffs"].([]interface{}) {
+					bfs = bfs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["buffs"].([]interface{})[ind].(map[string]interface{})["info"]) 
+				}
+				for ind := range c["pieces"].([]interface{}) {
+					pcs = pcs + FormatJSONResponse("pieceName", c["pieces"].([]interface{})[ind].(map[string]interface{}))
+					pcs = strings.Replace(pcs, "`", "", -1)
+				}
+				// }
+				return fmt.Sprintf(str, c["name"], bfs, pcs)
+			}else {
+				return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", c["name"])
 			}
-			for ind := range c["pieces"].([]interface{}) {
-				pcs = pcs + FormatJSONResponse("pieceName", c["pieces"].([]interface{})[ind].(map[string]interface{}))
-				pcs = strings.Replace(pcs, "`", "", -1)
-			}
-			// }
-			return fmt.Sprintf(str, c["name"], bfs, pcs)
+			
+			
 		
 		case "pieceName":
 			str := "```" + 
@@ -334,13 +343,16 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 				"Class Buffs:\n%s\n" +
 				"Gold Cost: %d gold\n" +
 			 	"================================\n```"
+
+			// SPECIES
 			var sps string
+
+			// SPECIES BUFFS
 			var sbs string
+
+			// CLASS BUFFS
 			var cbs string
 
-			// var gcs string
-			// var speciesBuffNames []string
-			// var classBuffName string
 			if c["species"] != nil {
 				
 				// LOOP THRU SPECIES AND GET ALL FORMATTED
@@ -348,31 +360,29 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 					s1 := &c["species"].([]interface{})[ind]
 					
 					sps = sps + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["species"].([]interface{})[ind]) 
-					sbs = ParseUserCommand("pieceSBuffs", strings.ToLower((*s1).(string)), -1)
+					sbs = sbs + ParseUserCommand("pieceSBuffs", strings.ToLower((*s1).(string)), -1)
 					
 				}
 
-
-				// // 
-				// str := fmt.Sprintf("%s.", c["class"].(string))
-				// classBuffName = str
 				cbs = ParseUserCommand("pieceCBuffs", strings.ToLower(c["class"].(string)), -1)
 				// _ = cBuffInfo
-
-
 			}else {
 				sps = sps + fmt.Sprintf("\t%s\n", "None") 
 			}
+			if c["gold_cost"] != nil {
+				return fmt.Sprintf(str, c["name"], sps, sbs, cbs, int(c["gold_cost"].(float64)))
+			} else {
+				return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", c["name"])
+			}
 			
-			return fmt.Sprintf(str, c["name"], sps, sbs, cbs, int(c["gold_cost"].(float64)))
 		case "pieceCBuffs":
-			log.Printf("%+v", c)
+			// log.Printf("%+v", c)
 			var cbs string
 			cbs = ""
 			for cname := range c {
 				for cInd := range c[cname].([]interface{}) {
 					// log.Printf("came: %s", c[cname].([]interface{})[cInd].(map[string]interface{})["info"])
-					cbs = cbs + fmt.Sprintf("\t%d. %s\n", (cInd + 1), c[cname].([]interface{})[cInd].(map[string]interface{})["info"]) 
+					cbs = cbs + fmt.Sprintf("\t%s %s\n", "*", c[cname].([]interface{})[cInd].(map[string]interface{})["info"]) 
 				}
 			}
 			if cbs != "" {
@@ -389,7 +399,7 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			for cname := range c {
 				for cInd := range c[cname].([]interface{}) {
 					// log.Printf("came: %s", c[cname].([]interface{})[cInd].(map[string]interface{})["info"])
-					sbs = sbs + fmt.Sprintf("\t%d. %s\n", (cInd + 1), c[cname].([]interface{})[cInd].(map[string]interface{})["info"]) 
+					sbs = sbs + fmt.Sprintf("\t%s %s\n", "*", c[cname].([]interface{})[cInd].(map[string]interface{})["info"]) 
 				}
 			}
 			if sbs != "" {
