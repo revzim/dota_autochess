@@ -40,7 +40,7 @@ func main () {
 	// CREATE HELP MSG
 	embedHelpMsg = &discordgo.MessageEmbed{
 		Author:      &discordgo.MessageEmbedAuthor{},
-	    Color:       0x00ff00, // Green
+	    Color:       0xB00020, // Green
 	    Description: "Dota AutoChess Commands!",
 	    Fields: []*discordgo.MessageEmbedField{
 	        &discordgo.MessageEmbedField{
@@ -58,7 +58,7 @@ func main () {
 	        &discordgo.MessageEmbedField{
 	            Name:   "!d_item <query_term>",
 	            Value:  "```\n" + 
-	            	"Name: Crystalys\n====================================\n\nRecipe:\n====================================\n" +
+	            	"Name: Crystalys\n====================================\nRecipe:\n====================================\n" +
 	            	"\t1. Attack Blade\n\t2. Broadsword\nEffects:\n====================================\n\t1. +15 Attack Damage\n\t2. 15% chance to deal 1.5x damage\n====================================" +
 	            "```",
 	            Inline: true,
@@ -119,9 +119,61 @@ func handleDiscordCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content[:1] == "!" {
 		
 		msg = ParseMsg(m.Content, strings.Index(m.Content, " "))
-		log.Printf("msg: %s", msg)
+		// log.Printf("msg: %s", msg)
 		if msg != "" {
-			s.ChannelMessageSend(m.ChannelID, msg)	
+			
+			var msgs []string
+			if len(msg) >= 1000 {
+				// log.Printf("len msgs: %d", len(msg))
+				var lastInd int
+				for i := len(msg) - 1000; i <= len(msg); i = (i + 1000 ) {
+					log.Printf("index: %d", i)
+					msgs = append(msgs, msg[lastInd:i])
+					lastInd = i
+				}
+				// log.Printf("len msgs: %d", len(msgs))
+				for mInd := range msgs {
+					if mInd == (len(msgs) - 1) {
+						msgs[mInd] = msgs[mInd][:len(msgs[mInd]) - 3]
+					}
+
+					log.Printf("SENDING MSG: %s", msgs[mInd])
+					d := &discordgo.MessageEmbed{
+						Author:      &discordgo.MessageEmbedAuthor{},
+					    Color:       0x00ff00, // Green
+					    Description: "Dota AutoChess Response!",
+					    Fields: []*discordgo.MessageEmbedField{
+					        &discordgo.MessageEmbedField{
+					            Name:   "Found: ",
+					            Value:  msgs[mInd][:],
+					            Inline: true,
+					        },
+					    },
+					    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+					    Title:     "I found something!",
+					}
+					s.ChannelMessageSendEmbed(m.ChannelID, d)	
+				}
+				
+			} else {
+				d := &discordgo.MessageEmbed{
+					Author:      &discordgo.MessageEmbedAuthor{},
+				    Color:       0x00ff00, // Green
+				    Description: "Dota AutoChess Response!",
+				    Fields: []*discordgo.MessageEmbedField{
+				        &discordgo.MessageEmbedField{
+				            Name:   "Found: ",
+				            Value:  msg,
+				            Inline: true,
+				        },
+				    },
+				    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+				    Title:     "I found something!",
+				}
+				s.ChannelMessageSendEmbed(m.ChannelID, d)	
+			}
+			
+			
 		}else {
 			s.ChannelMessageSendEmbed(m.ChannelID, embedHelpMsg)	
 		}
@@ -186,7 +238,7 @@ func ParseUserCommand(key string, msg string, msgLen int) string {
 	if len(c) > 1 {
 		return FormatJSONResponse(key, c)
 	}else {
-		return fmt.Sprintf("Sorry I don't have any record of a %s in my database.", msg[msgLen+1:])
+		return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", msg[msgLen+1:])
 	}
 }
 
