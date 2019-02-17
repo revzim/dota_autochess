@@ -41,7 +41,7 @@ func main () {
 	embedHelpMsg = &discordgo.MessageEmbed{
 		Author:      &discordgo.MessageEmbedAuthor{},
 	    Color:       0x00ff00, // Green
-	    Description: "Bot Help!",
+	    Description: "Dota AutoChess Commands!",
 	    Fields: []*discordgo.MessageEmbedField{
 	        &discordgo.MessageEmbedField{
 	            Name:   "!d_class <query_term>",
