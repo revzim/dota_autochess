@@ -14,6 +14,8 @@ import (
 	"strings"
 	"net/http"
 	"time"
+	"math"
+
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -73,12 +75,11 @@ func main () {
 	        },
 	    },
 	    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-	    Title:     "Bot Help!",
+	    Title:     "azim--autochess-bot help!",
 	}
 
 	// INIT DISCORD BOT SESSION WITH TOKEN
 	dg, err := discordgo.New("Bot " + Token)
-
 	if err != nil {
 		fmt.Printf("Error creating discord session: %s", err)
 		return
@@ -121,45 +122,42 @@ func handleDiscordCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 		msg = ParseMsg(m.Content, strings.Index(m.Content, " "))
 		// log.Printf("msg: %s", msg)
 		if msg != "" {
-			
-			var msgs []string
-			if len(msg) >= 1000 {
-				// log.Printf("len msgs: %d", len(msg))
-				var lastInd int
-				for i := len(msg) - 1000; i <= len(msg); i = (i + 1000 ) {
-					log.Printf("index: %d", i)
-					msgs = append(msgs, msg[lastInd:i])
-					lastInd = i
-				}
-				// log.Printf("len msgs: %d", len(msgs))
-				for mInd := range msgs {
-					if mInd == (len(msgs) - 1) {
-						msgs[mInd] = msgs[mInd][:len(msgs[mInd]) - 3]
-					}
+			if len(msg) > 1000 {
+				// MESSAGE IS LONGER THAN LIMIT TO SEND
+				// CREATE SPECIAL PAYLOADS SPLIT
+				msgs := CreateSplitPayloads(msg)
 
-					log.Printf("SENDING MSG: %s", msgs[mInd])
+				// MESSAGE WAS LONGER THAN LIMIT
+				// LOOP THRU MSGS AND SEND WITH EMBED
+				for mInd := range msgs {
+					// SET CUSTOM EMBED
 					d := &discordgo.MessageEmbed{
 						Author:      &discordgo.MessageEmbedAuthor{},
 					    Color:       0x00ff00, // Green
-					    Description: "Dota AutoChess Response!",
+					    Description: "Query Response!",
 					    Fields: []*discordgo.MessageEmbedField{
 					        &discordgo.MessageEmbedField{
-					            Name:   "Found: ",
+					            Name:   "Payload:",
 					            Value:  msgs[mInd][:],
 					            Inline: true,
 					        },
 					    },
 					    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-					    Title:     "I found something!",
+					    Title:     "azim--autochess-bot",
 					}
+
+					// SEND EMBED MSG W/ CREATED EMBED
 					s.ChannelMessageSendEmbed(m.ChannelID, d)	
 				}
 				
 			} else {
+
+				// MEETS LIMIT FOR MSG
+				// CREATE CUSTOM MSG EMBED AND SEND
 				d := &discordgo.MessageEmbed{
 					Author:      &discordgo.MessageEmbedAuthor{},
 				    Color:       0x00ff00, // Green
-				    Description: "Dota AutoChess Response!",
+				    Description: "Query Response!",
 				    Fields: []*discordgo.MessageEmbedField{
 				        &discordgo.MessageEmbedField{
 				            Name:   "Found: ",
@@ -168,13 +166,15 @@ func handleDiscordCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 				        },
 				    },
 				    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-				    Title:     "I found something!",
+				    Title:     "azim--autochess-bot",
 				}
+
+				// SEND CUSTOM EMBED
 				s.ChannelMessageSendEmbed(m.ChannelID, d)	
 			}
-			
-			
 		}else {
+			// SENDS CUSTOM HELP EMBED FOR USER 
+			// THAT MESSED UP A "!<bot_command>" COMMAND
 			s.ChannelMessageSendEmbed(m.ChannelID, embedHelpMsg)	
 		}
 		
@@ -183,6 +183,38 @@ func handleDiscordCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 }
 
+// CREATES SPLIT PAYLOADS FOR DISCORD IF LEN(MSG) > MAX_LEN_DISCORD_MSG
+func CreateSplitPayloads(msg string) []string {
+	// NEED ARB INDEX FOR SPLITS
+	var lastInd int
+	lastInd = 0
+
+	// WILL BE OUR MSG SPLIT UP INTO SEPARATE B/C OF LIMITER
+	var msgs []string
+
+	for i := 0; i < int(math.Ceil(float64((len(msg) + 3)) / float64(1000))) ; i++ {
+		// SET IND (OUR INDEX) TO OUR SET LEN OF MSG LENGTH (2000) - EMBED COUNT (1000) 1000 * IND
+		var ind int
+		ind = 1000 * (i + 1)
+		if ind >= len(msg) {
+			ind = len(msg)
+		}
+		log.Printf("ind: %d", ind)
+		if msg[lastInd:ind][:3] ==  "```" {
+			msgs = append(msgs, msg[lastInd:ind] + "```")
+		} else if msg[lastInd:ind][len(msg[lastInd:ind]) - 3:] ==  "```" {
+			msgs = append(msgs, "```" + msg[lastInd:ind])
+		}else {
+			msgs = append(msgs, "```" + msg[lastInd:ind] + "```")
+		}
+
+		// msgs = append(msgs, msg[lastInd:i])
+		lastInd = ind
+	}
+	return msgs
+}
+
+// PARSE MSG TO GET CORRECT BOT COMMAND 
 func ParseMsg(msg string, msgLen int) string {
 	// IF MESSAGE HAS ! [:1] 
 	switch msgLen {
@@ -208,6 +240,8 @@ func ParseMsg(msg string, msgLen int) string {
 	return ""
 }
 
+
+// PARSE USER COMMAND GENERIC WITH KEY FOR WHICH PARSE COMMAND
 func ParseUserCommand(key string, msg string, msgLen int) string {
 	query := url.PathEscape(strings.ToLower(msg[msgLen+1:]))
 	var urlPath string
@@ -242,6 +276,7 @@ func ParseUserCommand(key string, msg string, msgLen int) string {
 	}
 }
 
+// GENERIC FUNCTION W/ KEYS FOR FORMATTING GENERICS
 func FormatJSONResponse(key string, c map[string]interface{}) string {
 	switch key {
 		case "itemName": 
@@ -301,6 +336,7 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 	return ""
 }
 
+// GENERIC JSON PARSER TO RETURN GENERIC MAP
 func ParseJSON(b io.Reader) map[string]interface{} {
     body, err := ioutil.ReadAll(b)
     if err != nil {
