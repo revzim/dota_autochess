@@ -692,7 +692,12 @@ func CustomAutoChessHandler (c echo.Context, t string, param string) error {
 					}
 				} 
 			}
-			return c.JSON(http.StatusOK, i)
+			if len(i) > 0 {
+				return c.JSON(http.StatusOK, i)
+			}else {
+				return c.JSON(http.StatusNotFound, echo.Map{"info": "error bad component name"})
+			}
+			
 		default:
 			break
 	}
