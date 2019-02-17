@@ -53,7 +53,7 @@ func main () {
 					    "2. All friendly knights have a 35% chance to trigger a damage-reduction shield when attacked.\n\t" +
 					    "3. All friendly knights have a 45% chance to trigger a damage-reduction shield when attacked.\nPieces:\n" +
 					"================================\nName: Abaddon\n" +
-					"================================\nSpecies:\n\t1. Undead\nGold Cost: 3 gold\n================================\n" +
+					"================================\nSpecies:\n\t1. Undead\n================================\n" +
 					"...\n```",
 	            Inline: true,
 	        },
@@ -258,6 +258,9 @@ func ParseUserCommand(key string, msg string, msgLen int) string {
 		case "pieceName":
 			urlPath = fmt.Sprintf("http://localhost:8080/autochess/pieces/name/%s", query)
 			break
+		case "pieceNameS":
+			urlPath = fmt.Sprintf("http://localhost:8080/autochess/pieces/name/%s", query)
+			break
 		case "pieceCBuffs":
 			urlPath = fmt.Sprintf("http://localhost:8080/autochess/classes/buffs/%s", query)
 			break
@@ -324,7 +327,7 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 					bfs = bfs + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["buffs"].([]interface{})[ind].(map[string]interface{})["info"]) 
 				}
 				for ind := range c["pieces"].([]interface{}) {
-					pcs = pcs + FormatJSONResponse("pieceName", c["pieces"].([]interface{})[ind].(map[string]interface{}))
+					pcs = pcs + FormatJSONResponse("pieceNames", c["pieces"].([]interface{})[ind].(map[string]interface{}))
 					pcs = strings.Replace(pcs, "`", "", -1)
 				}
 				// }
@@ -332,15 +335,41 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 			}else {
 				return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", c["name"])
 			}
-			
+		
+		case "pieceNames":
+			str := "```" + 
+				"Name: %s\n================================\n" +
+				"Class Buffs:\n%s================================\n" +
+				"Gold Cost: %d gold\n" +
+			 	"================================\n```"
+
+			// SPECIES
+			var sps string
+
+			if c["species"] != nil {
+				
+				// LOOP THRU SPECIES AND GET ALL FORMATTED
+				for ind := range c["species"].([]interface{}) {
+					sps = sps + fmt.Sprintf("\t%d. %s\n", (ind + 1), c["species"].([]interface{})[ind]) 
+				}
+			}else {
+				sps = sps + fmt.Sprintf("\t%s\n", "None") 
+			}
+			if c["gold_cost"] != nil {
+				return fmt.Sprintf(str, c["name"], sps, int(c["gold_cost"].(float64)))
+			} else {
+				return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", c["name"])
+			}
+		
 			
 		
 		case "pieceName":
 			str := "```" + 
 				"Name: %s\n================================\n" +
+				"Class: %s\n================================\n" +
+				"Class Buffs:\n%s================================\n" +
 				"Species:\n%s================================\n" +
 				"Species Buffs:\n%s================================\n" +
-				"Class Buffs:\n%s================================\n" +
 				"Gold Cost: %d gold\n" +
 			 	"================================\n```"
 
@@ -370,7 +399,7 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 				sps = sps + fmt.Sprintf("\t%s\n", "None") 
 			}
 			if c["gold_cost"] != nil {
-				return fmt.Sprintf(str, c["name"], sps, sbs, cbs, int(c["gold_cost"].(float64)))
+				return fmt.Sprintf(str, c["name"], c["class"], cbs, sps, sbs, int(c["gold_cost"].(float64)))
 			} else {
 				return fmt.Sprintf("Sorry I don't have any record of a(n) %s in my database.", c["name"])
 			}
