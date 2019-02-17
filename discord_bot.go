@@ -338,9 +338,9 @@ func FormatJSONResponse(key string, c map[string]interface{}) string {
 		case "pieceName":
 			str := "```" + 
 				"Name: %s\n================================\n" +
-				"Species:\n%s" +
-				"Species Buffs:\n%s\n" +
-				"Class Buffs:\n%s\n" +
+				"Species:\n%s================================\n" +
+				"Species Buffs:\n%s================================\n" +
+				"Class Buffs:\n%s================================\n" +
 				"Gold Cost: %d gold\n" +
 			 	"================================\n```"
 
