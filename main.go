@@ -194,6 +194,12 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
+func init(){
+	
+}
+
+var _key string
+
 // MAIN FUNC
 func main() {
 	// 
@@ -208,8 +214,13 @@ func main() {
 	// FLAG FOR PORT NUMBER
     portPtr := flag.String("port", "443", "port number to run server")
 
+    // FLAG FOR SERVER KEY HASH SECRET 
+    secretKeyPtr := flag.String("k", "TESTKEYx01", "TESTKEY FOR SERVER JWT")
+
     // FLAG PARSE FLAGS
     flag.Parse()
+
+	_key = *secretKeyPtr
 	
 
 	// PIECES 
@@ -516,11 +527,11 @@ func handleJWTAuth(c echo.Context) error {
 }
 
 func handleJWTGrant(c echo.Context) error {
-	key := "x0v4frh5m"
+	
 	gameServerKey := c.FormValue("key")
 	name := c.FormValue("client_name")
 	id := c.FormValue("client_id")
-	if key == gameServerKey {
+	if _key == gameServerKey {
 		// SET CUSTOM CLAIMS
 		claims := &JWTClaim{
 			name,

@@ -27,6 +27,9 @@ func init() {
 	flag.Parse()
 }
 
+// HANDLER METHODS ARE ALWAYS lowerCamel
+// IMPLEMENTED METHODS (HELPERS & GENERICS ALWAYS) StrongCamel
+
 func main () {
 	// INIT DISCORD BOT SESSION WITH TOKEN
 	dg, err := discordgo.New("Bot " + Token)
@@ -37,7 +40,7 @@ func main () {
 	}
 
 	// REGISTER MESSAGE CREATE FUNC AS FIRST CALLBACK FOR DISCORD GO BOT
-	dg.AddHandler(messageCreate)
+	dg.AddHandler(handleDiscordCommands)
 
 	// OPEN WEBSOCKET CONNECTION TO DISCORD AND BEGIN LISTENING
 	err = dg.Open()
@@ -61,7 +64,7 @@ func main () {
 }	
 
 // EVERY TIME A MESSAGE IS RECEIVED, TRIGGER RESPONSE IF NECESSARY
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func handleDiscordCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// IGNORE ALL MESSAGES BY BOT
 	if m.Author.ID == s.State.User.ID {
