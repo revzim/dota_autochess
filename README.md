@@ -2,12 +2,13 @@
 
 ## hosted dota autochess dataserver with discord bot for easy info with simple commands. 
 
-#### uses webscraped data to help learn about dota auto chess pieces and items
 #### data was scraped from a site (parse_pieces.go), parsed into json and hosted locally (main.go) 
 
 ##### i wanted to learn a little more about the game and found a website to scrape for data. instead of trying to hit that site and scraping every start up i decided to parse the data into json and host the data locally on my own server. the discord bot (discord_bot.go) can then respond to certain commands with the given data for easy info with simple commands.
 
-### Frameworks I used for this project:
+##### as of right now (2018/19/2), data not provided. will provide on request or if enough requests ill just add to repo 
+
+### frameworks used for this project:
 #### lightweight, quick, and powerful Go web framework [echo](https://github.com/labstack/echo) 
 #### web scraper/crawler [colly](https://github.com/gocolly/colly)
 #### jquery-Go like library [goquery](https://github.com/PuerkitoBio/goquery)
