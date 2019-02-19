@@ -1,6 +1,6 @@
 # dota_autochess
 
-## hosted dota autochess dataserver with discord bot for easy info with simple commands. 
+## self-hosted dota autochess dataserver/api with discord bot for easy info with simple commands. 
 
 #### data was scraped from a site (parse_pieces.go), parsed into json and hosted locally (main.go) 
 
