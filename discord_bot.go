@@ -447,7 +447,7 @@ func ParseJSON(b io.Reader) map[string]interface{} {
 
 	err = json.Unmarshal(body, &c)
 	if err != nil {
-		log.Printf("ParseJSON json err: %s", err)
+		log.Printf("ParseJSON json err - attempting arr parse: %s", err)
 		var m []interface{}
 		err = json.Unmarshal(body, &m)
 		if err != nil {

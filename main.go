@@ -441,7 +441,7 @@ func ParseJSONToClass(b io.Reader) Classes {
     var c Classes
     err = json.Unmarshal(body, &c)
     if err != nil {
-        log.Error("ParseJSON json err: %e", err)
+        log.Error("ParseJSONToClass json err: %e", err)
     }
     return c
 }
@@ -454,7 +454,7 @@ func ParseJSONToSpecies(b io.Reader) Species {
     var s Species
     err = json.Unmarshal(body, &s)
     if err != nil {
-        log.Error("ParseJSON json err: %e", err)
+        log.Error("ParseJSONToSpecies json err: %e", err)
     }
     return s
 }
@@ -467,7 +467,7 @@ func ParseJSONToPieces(b io.Reader) ChessPieces {
     var p ChessPieces
     err = json.Unmarshal(body, &p)
     if err != nil {
-        log.Error("ParseJSON json err: %e", err)
+        log.Error("ParseJSONToPieces json err: %e", err)
     }
     return p
 }
@@ -480,7 +480,7 @@ func ParseJSONToItems(b io.Reader) Items {
     var i Items
     err = json.Unmarshal(body, &i)
     if err != nil {
-        log.Error("ParseJSON json err: %e", err)
+        log.Error("ParseJSONToItems json err: %e", err)
     }
     return i
 }

@@ -5,8 +5,17 @@
 
 ## installation:
 #### + clone the repo
+#### + install all go dependencies
+	- auto "go get ./..."
+	- manually:
+		- go get -u github.com/labstack/echo
+		- go get -u github.com/gocolly/colly
+		- go get -u github.com/PuerkitoBio/goquery
+		- go get -u github.com/dgrijalva/jwt-go
+		- go get -u golang.org/x/crypto/acme/autocert
 #### + in base directory of repo, run the locally hosted server: "go run main.go -port 8080 &"
 	- this will spin up the dataserver/api for dota autochess data
+	- & appended if want to run discord bot in same terminal windows
 #### + in base directory of repo, spin up the discord bot: "go run discord_bot.go -t 'YOUR_DISCORD_BOT_TOKEN'" 
 	- this will spin up the bot and once online, the bot can then be used to query dota auto chess info
 
