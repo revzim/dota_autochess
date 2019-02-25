@@ -352,7 +352,7 @@ func main() {
     //e.GET("autochesss/piece/buffs/:name", handlePiecesBuffsByName)
     //
 
-    // SPECIES ROUTING
+    // ITEMS ROUTING
     e.GET("/autochess/items", handleItems)
     e.GET("/autochess/items/name/:name", handleItemsByName)
     e.GET("autochess/items/recipe/:name", handleItemsByComponent)
