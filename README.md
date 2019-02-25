@@ -1,6 +1,6 @@
 # dota_autochess
 
-## self-hosted dota autochess dataserver/api with discord bot for easy info with simple commands. 
+## simple self-hosted dota autochess dataserver/api with discord bot for easy info with simple commands. 
 
 
 ## installation:
