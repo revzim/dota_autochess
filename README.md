@@ -2,7 +2,6 @@
 
 ## simple self-hosted dota autochess dataserver/api with discord bot for easy info with simple commands. 
 
-
 ## installation:
 #### + clone the repo
 #### + use Makefile
@@ -133,3 +132,6 @@ Effects:
 #### - jquery-Go like library [goquery](https://github.com/PuerkitoBio/goquery)
 #### - jwt library (not yet implemented no reason) [jwt-go](https://github.com/dgrijalva/jwt-go)
 #### - autocert library for https when hosted on my site [autocert](https://golang.org/x/crypto/acme/autocert)
+
+
+##### if anyone has a better data source, please let me know!
