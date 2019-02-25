@@ -217,6 +217,12 @@ func main() {
 
     jwtKeyPtr := flag.String("pw", "", "server pw key for ")
 
+    // FLAG FOR HTTPS CERT (LETS ENCRYPT/ETC)
+    httpsPrivateKeyPtr := flag.String("pk", "", "private key location")
+
+    httpsCertKeyPtr := flag.String("ck", "", "cert key location")
+
+
     // FLAG PARSE FLAGS
     flag.Parse()
 
@@ -391,7 +397,7 @@ func main() {
 		}(e)
 
 		// START TLS
-		e.Logger.Fatal(e.StartTLS(fmt.Sprintf(":%s", *portPtr), "/etc/letsencrypt/live/andy.zimmelman.org-0001/cert.pem", "/etc/letsencrypt/live/andy.zimmelman.org-0001/privkey.pem"))
+		e.Logger.Fatal(e.StartTLS(fmt.Sprintf(":%s", *portPtr), *httpsCertKeyPtr, *httpsPrivateKeyPtr))
 	} else {
 		// START TEST
 		e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", *portPtr)))
