@@ -202,9 +202,7 @@ var _key string
 
 // MAIN FUNC
 func main() {
-	// 
-	_jwtSigningKey = []byte("ElephantMonkeyRelaxPeanut")
-
+	
     // SET RAND SEED
     rand.Seed(time.Now().UTC().UnixNano())
 
@@ -217,11 +215,15 @@ func main() {
     // FLAG FOR SERVER KEY HASH SECRET 
     secretKeyPtr := flag.String("k", "", "TESTKEY FOR SERVER JWT")
 
+    jwtKeyPtr := flag.String("pw", "", "server pw key for ")
+
     // FLAG PARSE FLAGS
     flag.Parse()
 
 	_key = *secretKeyPtr
 	
+	// 
+	_jwtSigningKey = []byte(*jwtKeyPtr)
 
 	// PIECES 
 	GetDataFromFile("pieces") 
