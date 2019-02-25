@@ -70,6 +70,30 @@ Effects:
 
 > ================================
 
+
+
+##### !d_piece <query_piece>
+> example: !d_piece dragon knight
+
+> Name: Dragon Knight
+
+
+> ================================
+
+
+> Species:
+
+
+> 1. Dragon
+
+> 2. Human
+Gold 
+
+> Cost: 4 gold
+
+
+> ================================
+
 #### data was scraped from a site (parse_pieces.go), parsed into json and hosted locally (main.go) 
 
 ##### i wanted to learn a little more about the game and found a website to scrape for data. instead of trying to hit that site and scraping every start up i decided to parse the data into json and host the data locally on my own server. the discord bot (discord_bot.go) can then respond to certain commands with the given data for easy info with simple commands.
