@@ -110,7 +110,7 @@ Gold
 
 ##### + data added -> 2019/25/02 | data last parsed -> 2019/16/02
 
-### frameworks used for this project:
+### frameworks used for this project (deps):
 #### - lightweight, quick, and powerful Go web framework [echo](https://github.com/labstack/echo) 
 #### - web scraper/crawler [colly](https://github.com/gocolly/colly)
 #### - jquery-Go like library [goquery](https://github.com/PuerkitoBio/goquery)
