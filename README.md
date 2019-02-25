@@ -103,9 +103,9 @@ Gold
 > ================================
 
 #### + data was scraped from a site (parse_pieces.go), parsed into json and hosted locally (main.go) 
-	- sites: 
-	- 	[ITEMS](https://www.esportstales.com/dota-2/auto-chess-item-stats-combinations-and-upgrades)
-	- 	[PIECES](https://www.esportstales.com/dota-2/auto-chess-class-and-species-hero-synergy-list)
+- SITES: 
+- 	[ITEMS](https://www.esportstales.com/dota-2/auto-chess-item-stats-combinations-and-upgrades)
+- 	[PIECES](https://www.esportstales.com/dota-2/auto-chess-class-and-species-hero-synergy-list)
 
 ##### + i wanted to learn a little more about the game and found a website to scrape for data. instead of trying to hit that site and scraping every start up i decided to parse the data into json and host the data locally on my own server. the discord bot (discord_bot.go) can then respond to certain commands with the given data for easy info with simple commands.
 
