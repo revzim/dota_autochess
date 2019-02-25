@@ -3,9 +3,9 @@
 ## self-hosted dota autochess dataserver/api with discord bot for easy info with simple commands. 
 
 ## usage (discord bot commands):
-### !d_class <query_class>
-> 	example: !d_class knight
->	response: 
+##### !d_class <query_class>
+> example: !d_class knight
+
 > Name: Knight
 > ================================
 > Buffs:
