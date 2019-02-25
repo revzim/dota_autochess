@@ -172,7 +172,7 @@ func main() {
 	// ScrapeForPieces(*url, *classFlag, *piecesFlag, *parseSkip1)
 	_ = url
 
-	ScrapeForChessItems("https://www.esportstales.com/dota-2/auto-chess-item-stats-combinations-and-upgrades", *classFlag, *piecesFlag, *parseSkip1)
+	// ScrapeForChessItems("", *classFlag, *piecesFlag, *parseSkip1)
 
 	// for ind := range _items {
 
