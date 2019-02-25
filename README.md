@@ -32,10 +32,45 @@
 
 
 > 	Species:
+
 >    		1. Undead
+
 >	================================
 
 > 	...
+
+
+##### !d_item <query_item>
+> example: !d_class crystalys
+
+> Name: Crystalys
+
+
+> ================================
+
+
+
+> Recipe:
+
+> 
+================================
+
+
+> 1. Attack Blade
+   
+> 2. Broadsword
+Effects:
+ 
+
+> ================================
+ 
+
+> 1. +15 Attack Damage
+
+> 2. 15% chance to deal 1.5x damage
+
+
+> ================================
 
 #### data was scraped from a site (parse_pieces.go), parsed into json and hosted locally (main.go) 
 
