@@ -8,25 +8,31 @@
 
 
 > 	Name: Knight
+
 > 	================================
 
 
 > 	Buffs:
+
 > 	================================
+
 >    1. All friendly knights have a 25% chance to trigger a damage-reduction shield when attacked.
 >    2. All friendly knights have a 35% chance to trigger a damage-reduction shield when attacked.
 >    3. All friendly knights have a 45% chance to trigger a damage-reduction shield when attacked.
 
 
 > 	Pieces:
+
 > 	================================
 
 
 > 	Name: Abaddon
+
 > 	================================
 
 
 > 	Species:
+
 >    		1. Undead
 
 >	================================
