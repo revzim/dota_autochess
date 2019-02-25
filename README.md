@@ -103,7 +103,6 @@ Gold
 > ================================
 
 #### + data was scraped from a site (parse_pieces.go), parsed into json and hosted locally (main.go) 
-- SITES: 
 * 	[ITEMS](https://www.esportstales.com/dota-2/auto-chess-item-stats-combinations-and-upgrades)
 * 	[PIECES](https://www.esportstales.com/dota-2/auto-chess-class-and-species-hero-synergy-list)
 
