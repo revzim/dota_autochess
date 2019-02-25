@@ -62,18 +62,18 @@
 
 > ================================
 
-> 1. Attack Blade
+> 	1. Attack Blade
    
-> 2. Broadsword
+> 	2. Broadsword
 Effects:
  
 
 > ================================
  
 
-> 1. +15 Attack Damage
+> 	1. +15 Attack Damage
 
-> 2. 15% chance to deal 1.5x damage
+> 	2. 15% chance to deal 1.5x damage
 
 
 > ================================
@@ -92,12 +92,12 @@ Effects:
 > Species:
 
 
-> 1. Dragon
+> 	1. Dragon
 
-> 2. Human
-Gold 
+> 	2. Human
+ 
 
-> Cost: 4 gold
+> Gold Cost: 4 gold
 
 
 > ================================
