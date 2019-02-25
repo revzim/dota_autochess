@@ -41,7 +41,7 @@
 
 
 ##### !d_item <query_item>
-> example: !d_class crystalys
+> example: !d_item crystalys
 
 > Name: Crystalys
 
@@ -51,8 +51,10 @@
 
 
 > Recipe:
+
 > 
 ================================
+
 
 
 > 1. Attack Blade
