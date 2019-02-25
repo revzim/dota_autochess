@@ -19,6 +19,7 @@ install: go-get
 go-get: 
 	go get -u ./...
 
+## start: start dota item/piece api/server and run discord bot
 start:
 	@echo " > running bot & server"
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go run main.go -port "8080" & 
