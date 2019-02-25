@@ -2,27 +2,17 @@ package main
 
 import (
 	// "crypto/md5"
-	// "encoding/json"
-	// "net/url"
-	// "net/http"
-	// "bytes"
-	// "os"
 	// "regexp"
-	// "image"
-	// "image/jpeg"
-	// "io/ioutil"
 	// "encoding/base64"
-	// "bufio"
 	// er "errors"
-	// "fmt"
 	// "log"	
-	"strings"
 	// "strconv"
-	"flag"
-
 	// "bufio"
-	"io/ioutil"
 	// "bytes"
+
+	"strings"
+	"flag"
+	"io/ioutil"
 	"encoding/json"
 	"time"
 	"math/rand"
@@ -30,13 +20,8 @@ import (
 	"html/template"
 	"os"
 	"net/url"
-	
 	"fmt"
 	"net/http"
-
-
-	// "github.com/PuerkitoBio/goquery"
-	// "github.com/gocolly/colly"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
