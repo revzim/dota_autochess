@@ -6,9 +6,9 @@
 ## installation:
 #### + clone the repo
 #### + in base directory of repo, run the locally hosted server: "go run main.go -port 8080 &"
-		- this will spin up the dataserver/api for dota autochess data
+	- this will spin up the dataserver/api for dota autochess data
 #### + in base directory of repo, spin up the discord bot: "go run discord_bot.go -t 'YOUR_DISCORD_BOT_TOKEN'" 
-		- this will spin up the bot and once online, the bot can then be used to query dota auto chess info
+	- this will spin up the bot and once online, the bot can then be used to query dota auto chess info
 
 ## usage (discord bot commands):
 ##### !d_class <query_class>
