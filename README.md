@@ -5,6 +5,14 @@
 
 ## installation:
 #### + clone the repo
+#### + use Makefile
+	- make install 
+		- *can fail out, but will install dependencies
+	- make start
+		- will auto spin up server on port 8080
+		- will prompt for Discord Bot Token
+		- will then spin up discord bot
+		
 #### + install all go dependencies
 	- auto "go get ./..."
 	- manually:
